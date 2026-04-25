@@ -40,22 +40,19 @@ export const FragmentoSatelite: React.FC<FragmentoSateliteProps> = ({ id }) => {
               `}
             </style>
             <div
+              className="absolute rounded-full bg-current pointer-events-none"
               style={{
-                position: 'absolute',
                 width: s.size,
                 height: s.size,
                 top: '50%',
                 left: '50%',
                 marginTop: -(s.size / 2),
                 marginLeft: -(s.size / 2),
-                borderRadius: '50%',
-                background: 'currentColor',
                 boxShadow: '0 0 5px currentColor',
                 animation: `${orbitId} ${s.duration}ms linear infinite`,
                 animationDelay: `${s.delay}ms`,
                 animationDirection: s.direction,
-                pointerEvents: 'none',
-              }}
+              } as React.CSSProperties}
             />
           </React.Fragment>
         );

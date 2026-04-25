@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "import-data": "ts-node scripts/import_candidatos.ts",
-    "vincular-atributos": "ts-node scripts/vincular_atributos.ts"
+    "vincular-atributos": "ts-node scripts/vincular_atributos.ts",
+    "upload-assets": "ts-node scripts/upload_assets.ts"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"

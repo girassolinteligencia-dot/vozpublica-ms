@@ -3,9 +3,9 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { candidatoId: string } }
+  { params }: { params: Promise<{ candidatoId: string }> }
 ) {
-  const { candidatoId } = params;
+  const { candidatoId } = await params;
 
   try {
     const resultados = await prisma.avaliacao.groupBy({
