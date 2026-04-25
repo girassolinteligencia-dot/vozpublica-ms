@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Campanha {
+  id          String   @id @default(cuid())
+  nome        String
+  slug        String   @unique
+  data_inicio DateTime @default(now())
+  data_fim    DateTime?
+  
+  candidatos  Candidato[]
+  atributos   CampanhaAtributo[]
+
+  @@map("campanhas")
+}
+
+model Atributo {
+  id          String   @id @default(cuid())
+  nome        String   @unique
+  icone       String?
+  
+  campanhas   CampanhaAtributo[]
+  avaliacoes  Avaliacao[]
+
+  @@map("atributos")
+}
+
+model CampanhaAtributo {
+  id          String   @id @default(cuid())
+  campanha_id String
+  atributo_id String
+  
+  campanha    Campanha @relation(fields: [campanha_id], references: [id])
+  atributo    Atributo @relation(fields: [atributo_id], references: [id])
+
+  @@map("campanha_atributos")
+}
+
+model Candidato {
+  id          String   @id @default(cuid())
+  nome        String
+  cargo       String
+  foto_url    String?
+  cidade      String
+  bairro      String?
+  campanha_id String
+  
+  campanha    Campanha @relation(fields: [campanha_id], references: [id])
+  avaliacoes  Avaliacao[]
+
+  @@map("candidatos")
+}
+
+model Avaliacao {
+  id               String   @id @default(cuid())
+  candidato_id     String
+  atributo_id      String
+  valor            Int      // 1 (Positivo) ou -1 (Negativo)
+  fingerprint_hash String
+  ip_hash          String
+  user_agent       String?
+  criado_em        DateTime @default(now())
+
+  candidato        Candidato @relation(fields: [candidato_id], references: [id])
+  atributo         Atributo @relation(fields: [atributo_id], references: [id])
+
+  @@index([candidato_id])
+  @@index([fingerprint_hash])
+  @@index([ip_hash])
+  @@map("avaliacoes")
+}
+
+model Bloqueio {
+  id          String   @id @default(cuid())
+  hash        String   @unique // Pode ser IP ou Fingerprint
+  motivo      String?
+  expira_em   DateTime?
+  criado_em   DateTime @default(now())
+
+  @@map("bloqueios")
+}
