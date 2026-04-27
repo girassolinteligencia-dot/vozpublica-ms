@@ -10,7 +10,6 @@ export default defineConfig({
   schema: 'prisma/schema.prisma',
   datasource: {
     url: process.env.DATABASE_URL!,
-    // @ts-expect-error - Prisma 6
     directUrl: process.env.DIRECT_URL!
   }
 })

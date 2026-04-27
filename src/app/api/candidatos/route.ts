@@ -7,9 +7,13 @@ export async function GET(req: NextRequest) {
   const cargo = searchParams.get('cargo');
 
   try {
+    // Para cargos estaduais/federais, a cidade no banco é 'MATO GROSSO DO SUL'
+    // Então não devemos filtrar pela cidade selecionada pelo usuário nesses casos
+    const isCargoEstadual = ['Governador', 'Senador', 'Deputado Federal', 'Deputado Estadual', 'Presidente'].includes(cargo || '');
+
     const candidatos = await prisma.candidato.findMany({
       where: {
-        ...(cidade && {
+        ...(!isCargoEstadual && cidade && {
           cidade: {
             equals: cidade,
             mode: 'insensitive'
@@ -38,7 +42,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(candidatos);
   } catch (error) {
     console.error('Erro ao buscar candidatos:', error);
-    // Retorna array vazio em vez de erro para o frontend
     return NextResponse.json([], { status: 200 });
   }
 }
