@@ -16,7 +16,7 @@ async function validate() {
     const tables = ['Campanha', 'Atributo', 'Candidato', 'Avaliacao'];
     console.log('\n📊 Status das Tabelas:');
     for (const table of tables) {
-      // @ts-ignore
+      // @ts-expect-error - TS não permite acesso dinâmico direto no cliente Prisma
       const tCount = await prisma[table.toLowerCase()].count();
       console.log(`- ${table}: ${tCount} registros`);
     }
