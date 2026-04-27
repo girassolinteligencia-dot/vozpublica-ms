@@ -64,13 +64,11 @@ export default function AvaliarPage() {
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/candidatos?campanha=ms-2026&cidade=${userData.cidade}`
+        `/api/candidatos?cidade=${encodeURIComponent(userData.cidade)}&cargo=${encodeURIComponent(cargoStr)}`
       );
       const data = await res.json();
-      
-      // Garante que data é array antes de filtrar
       const lista = Array.isArray(data) ? data : [];
-      setCandidatos(lista.filter((c: Candidato) => c.cargo === cargoStr));
+      setCandidatos(lista);
       setStep(3);
     } catch (error) {
       console.error('Erro ao buscar candidatos:', error);

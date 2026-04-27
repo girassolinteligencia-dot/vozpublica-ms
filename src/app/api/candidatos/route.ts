@@ -3,14 +3,24 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const campanhaSlug = searchParams.get('campanha');
   const cidade = searchParams.get('cidade');
+  const cargo = searchParams.get('cargo');
 
   try {
     const candidatos = await prisma.candidato.findMany({
       where: {
-        ...(campanhaSlug && { campanha: { slug: campanhaSlug } }),
-        ...(cidade && { cidade }),
+        ...(cidade && {
+          cidade: {
+            equals: cidade,
+            mode: 'insensitive'
+          }
+        }),
+        ...(cargo && {
+          cargo: {
+            equals: cargo,
+            mode: 'insensitive'
+          }
+        }),
       },
       include: {
         campanha: {
@@ -27,7 +37,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(candidatos);
   } catch (error) {
-    console.error('Error fetching candidates:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('Erro ao buscar candidatos:', error);
+    // Retorna array vazio em vez de erro para o frontend
+    return NextResponse.json([], { status: 200 });
   }
 }
