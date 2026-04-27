@@ -85,8 +85,8 @@ export default function LandingPage() {
               className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-[#f5f0e8] leading-[1.1]"
               style={{ fontFamily: TOKENS.FONTS.DISPLAY }}
             >
-              Sua Voz, <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#d97757] via-[#c8933a] to-[#d97757]">O Destino do MS</span>
+              Não é uma pesquisa. <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#d97757] via-[#c8933a] to-[#d97757]">É o futuro de MS.</span>
             </motion.h1>
             
             <motion.p
@@ -96,8 +96,8 @@ export default function LandingPage() {
               className="text-sm sm:text-lg md:text-xl text-[#b0aea5] max-w-lg mx-auto leading-relaxed px-4"
               style={{ fontFamily: TOKENS.FONTS.BODY }}
             >
-              Transforme sua avaliação em impacto real. <br className="hidden sm:block" />
-              O futuro do Mato Grosso do Sul em suas mãos.
+              A plataforma de inteligência e percepção pública do Mato Grosso do Sul. <br className="hidden sm:block" />
+              Um espaço seguro, projetado para que sua visão modele as Eleições de 2026.
             </motion.p>
           </div>
 
@@ -110,13 +110,13 @@ export default function LandingPage() {
           >
             <Link href="/avaliar" className="w-full sm:w-auto">
               <button className="w-full px-8 py-4 rounded-full bg-[#d97757] text-[#f5f0e8] font-bold text-xs sm:text-sm uppercase tracking-[0.2em] transition-all hover:bg-[#c4633d] hover:scale-105 active:scale-95 shadow-xl">
-                Começar
+                Expressar Minha Visão
               </button>
             </Link>
             
             <Link href="/admin/dashboard" className="w-full sm:w-auto">
               <button className="w-full px-8 py-4 rounded-full bg-[#1c1814]/50 backdrop-blur-md border border-[#3d3128] text-[#f5f0e8] font-bold text-xs sm:text-sm uppercase tracking-[0.2em] transition-all hover:bg-[#3d3128]">
-                Painel
+                Acesso Restrito
               </button>
             </Link>
           </motion.div>
@@ -134,7 +134,7 @@ export default function LandingPage() {
             </span>
             <span className="flex items-center gap-1.5">
               <div className="w-1 h-1 rounded-full bg-[#c8933a]" />
-              Seguro
+              Criptografado
             </span>
             <span className="flex items-center gap-1.5">
               <div className="w-1 h-1 rounded-full bg-[#a8c47a]" />
