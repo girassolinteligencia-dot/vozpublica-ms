@@ -16,27 +16,47 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      // Lista de e-mails com permissão total no painel administrativo
-      const ALLOWED_EMAILS = [
-        'paulo@vozpublica.com.br',
-        'contato@vozpublica.com.br',
-        'girassolinteligencia@gmail.com'
-      ];
+    // Definimos os e-mails permitidos
+    const ALLOWED_EMAILS = [
+      'paulo@vozpublica.com.br',
+      'contato@vozpublica.com.br',
+      'girassolinteligencia@gmail.com'
+    ];
 
+    const checkSession = async () => {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      
       const userEmail = currentSession?.user?.email?.toLowerCase().trim() || '';
 
       if (!currentSession || !ALLOWED_EMAILS.includes(userEmail)) {
-        // Se houver sessão mas o e-mail não for autorizado, forçar logout
-        if (currentSession) {
-          supabase.auth.signOut();
-        }
+        if (currentSession) await supabase.auth.signOut();
         router.push('/admin/login');
       } else {
         setSession(currentSession);
+        setLoading(false);
       }
-      setLoading(false);
+    };
+
+    // Escuta mudanças de estado (útil para quando o Magic Link acabou de processar a URL)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+      if (event === 'SIGNED_IN') {
+        const userEmail = currentSession?.user?.email?.toLowerCase().trim() || '';
+        if (ALLOWED_EMAILS.includes(userEmail)) {
+          setSession(currentSession);
+          setLoading(false);
+        } else {
+          supabase.auth.signOut().then(() => router.push('/admin/login'));
+        }
+      } else if (event === 'SIGNED_OUT') {
+        router.push('/admin/login');
+      }
     });
+
+    checkSession();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [router]);
 
   if (loading) return (
