@@ -24,6 +24,10 @@ const config: Config = {
         positive: '#a8c47a',
         negative: '#d97757',
         voter: '#c8933a',
+      },
+      fontFamily: {
+        display: ['var(--font-outfit)', 'sans-serif'],
+        body: ['var(--font-roboto)', 'sans-serif'],
       }
     },
   },

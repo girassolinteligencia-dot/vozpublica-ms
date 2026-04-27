@@ -151,82 +151,85 @@ export default function AvaliarPage() {
         }}
       />
 
-      <AnimatePresence mode="wait">
-        {loading || isSubmitting ? (
-          <motion.div 
-            key="processing"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="w-full h-full flex flex-col items-center justify-center gap-8"
-          >
-            <div className="relative w-32 h-32 flex items-center justify-center">
-              <div className="absolute inset-0 animate-pulse bg-[#d97757]/10 rounded-full blur-3xl scale-150" />
-              <Fragmento id="sync-frag" label="" type="positivo" />
-            </div>
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-[#d97757] font-display uppercase tracking-[0.5em] text-[10px] font-bold">
-                {isSubmitting ? 'Ecoando sua Voz...' : 'Sincronizando Dados...'}
-              </span>
-              <div className="flex gap-1">
-                {[0, 1, 2].map(i => (
-                  <motion.div
-                    key={i}
-                    className="w-1 h-1 rounded-full bg-[#d97757]"
-                    animate={{ opacity: [0.2, 1, 0.2] }}
-                    transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
-                  />
-                ))}
+      {/* Container Principal com Margens Seguras e Rolagem Interna controlada */}
+      <div className="relative z-10 w-full h-full flex flex-col pt-safe pb-safe px-safe overflow-hidden">
+        <AnimatePresence mode="wait">
+          {loading || isSubmitting ? (
+            <motion.div 
+              key="processing"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="w-full h-full flex flex-col items-center justify-center gap-8 px-6"
+            >
+              <div className="relative w-32 h-32 flex items-center justify-center">
+                <div className="absolute inset-0 animate-pulse bg-[#d97757]/10 rounded-full blur-3xl scale-150" />
+                <Fragmento id="sync-frag" label="" type="positivo" />
               </div>
-            </div>
-          </motion.div>
-        ) : (
-          <>
-            {step === 1 && (
-              <Etapa1 
-                userData={userData} 
-                setUserData={setUserData} 
-                onNext={() => setStep(2)} 
-                cidades={cidades}
-                perfis={perfis}
-              />
-            )}
-            {step === 2 && (
-              <Etapa2 
-                cidade={userData.cidade}
-                onSelect={(c) => { setCargo(c); fetchCandidatos(c); }} 
-                onBack={() => setStep(1)} 
-              />
-            )}
-            {step === 3 && (
-              <Etapa3 
-                cargo={cargo}
-                cidade={userData.cidade}
-                candidatos={candidatos}
-                onSelect={handleCandidatoSelect}
-                onBack={() => setStep(2)}
-              />
-            )}
-            {step === 4 && candidato && (
-              <Etapa4 
-                candidato={candidato}
-                evaluations={evaluations}
-                onAttributeClick={handleAttributeClick}
-                onSubmit={submitEvaluation}
-                isSubmitting={isSubmitting}
-                parallax={parallax}
-              />
-            )}
-            {step === 5 && (
-              <Etapa5 
-                results={results}
-                candidatoNome={candidato?.nome || ''}
-                onReset={() => window.location.reload()}
-              />
-            )}
-          </>
-        )}
-      </AnimatePresence>
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-[#d97757] font-display uppercase tracking-[0.5em] text-[10px] font-bold">
+                  {isSubmitting ? 'Ecoando sua Voz...' : 'Sincronizando Dados...'}
+                </span>
+                <div className="flex gap-1">
+                  {[0, 1, 2].map(i => (
+                    <motion.div
+                      key={i}
+                      className="w-1 h-1 rounded-full bg-[#d97757]"
+                      animate={{ opacity: [0.2, 1, 0.2] }}
+                      transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            <>
+              {step === 1 && (
+                <Etapa1 
+                  userData={userData} 
+                  setUserData={setUserData} 
+                  onNext={() => setStep(2)} 
+                  cidades={cidades}
+                  perfis={perfis}
+                />
+              )}
+              {step === 2 && (
+                <Etapa2 
+                  cidade={userData.cidade}
+                  onSelect={(c) => { setCargo(c); fetchCandidatos(c); }} 
+                  onBack={() => setStep(1)} 
+                />
+              )}
+              {step === 3 && (
+                <Etapa3 
+                  cargo={cargo}
+                  cidade={userData.cidade}
+                  candidatos={candidatos}
+                  onSelect={handleCandidatoSelect}
+                  onBack={() => setStep(2)}
+                />
+              )}
+              {step === 4 && candidato && (
+                <Etapa4 
+                  candidato={candidato}
+                  evaluations={evaluations}
+                  onAttributeClick={handleAttributeClick}
+                  onSubmit={submitEvaluation}
+                  isSubmitting={isSubmitting}
+                  parallax={parallax}
+                />
+              )}
+              {step === 5 && (
+                <Etapa5 
+                  results={results}
+                  candidatoNome={candidato?.nome || ''}
+                  onReset={() => window.location.reload()}
+                />
+              )}
+            </>
+          )}
+        </AnimatePresence>
+      </div>
     </main>
   );
 }

@@ -68,8 +68,8 @@ export const Etapa4: React.FC<Etapa4Props> = ({
       </AnimatePresence>
 
       {/* Energy Bar (Radial) */}
-      <div className="absolute z-15 w-[180px] h-[180px]">
-        <svg className="w-full h-full transform -rotate-90">
+      <div className="absolute z-15 w-[140px] h-[140px] sm:w-[180px] sm:h-[180px]">
+        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 180 180">
           <circle
             cx="90"
             cy="90"
@@ -95,7 +95,7 @@ export const Etapa4: React.FC<Etapa4Props> = ({
 
       {/* Foto Central (Camada de Foco) */}
       <motion.div 
-        className="relative z-20 w-[150px] h-[150px] rounded-full border-2 border-[#d97757] overflow-hidden shadow-[0_0_60px_rgba(217,119,87,0.4)] bg-[#1c1814]"
+        className="relative z-20 w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] rounded-full border-2 border-[#d97757] overflow-hidden shadow-[0_0_50px_rgba(217,119,87,0.3)] bg-[#1c1814]"
         style={{ x: parallax.x * 2, y: parallax.y * 2 }} 
         animate={evaluations.length > 0 ? { scale: [1, 1.05, 1] } : {}}
       >
@@ -109,14 +109,14 @@ export const Etapa4: React.FC<Etapa4Props> = ({
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-[#d97757]/40 bg-[#1c1814]">
-            <span className="text-[12px] font-bold uppercase tracking-widest">{candidato.nome.split(' ')[0]}</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest">{candidato.nome.split(' ')[0]}</span>
           </div>
         )}
       </motion.div>
 
       {/* Halo de Foco */}
       <motion.div
-        className="absolute z-10 w-[210px] h-[210px] rounded-full border border-[#d97757]/10 blur-xl"
+        className="absolute z-10 w-[180px] h-[180px] sm:w-[210px] sm:h-[210px] rounded-full border border-[#d97757]/10 blur-xl"
         style={{ x: parallax.x * 4, y: parallax.y * 4 }}
         animate={{ opacity: [0.1, 0.3, 0.1], scale: [1, 1.1, 1] }}
         transition={{ duration: 6, repeat: Infinity }}
@@ -128,15 +128,17 @@ export const Etapa4: React.FC<Etapa4Props> = ({
         const isEvaluated = evaluations.some(e => e.atributoId === item.id);
         if (isEvaluated) return null;
 
-        // Positioning in arc (Bottom arc 120deg to 420deg)
-        const pos = getArcPosition(i, totalAtributos, 120, 420, 165);
+        // Dynamic radius for better mobile fit
+        // Use a smaller radius on very small screens to avoid horizontal overflow
+        const orbitalRadius = typeof window !== 'undefined' && window.innerWidth < 360 ? 135 : 160;
+        const pos = getArcPosition(i, totalAtributos, 120, 420, orbitalRadius);
         
         return (
           <motion.div 
             key={item.id}
             className="absolute z-30"
             style={{ left: `calc(50% + ${pos.x}px)`, top: `calc(50% + ${pos.y}px)` }}
-            animate={{ x: parallax.x * 6, y: parallax.y * 6 }}
+            animate={{ x: parallax.x * 5, y: parallax.y * 5 }}
             exit={{ 
               scale: 0, 
               x: -pos.x, 
@@ -156,34 +158,34 @@ export const Etapa4: React.FC<Etapa4Props> = ({
       })}
 
       {/* Overlay de Informação e CTA */}
-      <div className="absolute bottom-12 left-0 w-full px-8 flex flex-col items-center gap-6 z-40">
+      <div className="absolute bottom-safe left-0 w-full px-6 flex flex-col items-center gap-4 z-40 pb-8">
         <div className="text-center">
-          <h2 className="text-lg font-bold font-display uppercase tracking-[0.2em] text-[#d97757]">{candidato.nome}</h2>
-          <p className="text-[10px] text-[#7a6e64] font-body uppercase tracking-widest mt-1">
+          <h2 className="text-base font-bold font-display uppercase tracking-[0.2em] text-[#d97757] line-clamp-1">{candidato.nome}</h2>
+          <p className="text-[9px] text-[#7a6e64] font-body uppercase tracking-widest mt-1">
             {candidato.cargo} | {candidato.cidade}
           </p>
         </div>
 
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-2 w-full max-w-[280px]">
           <button 
             onClick={onSubmit}
             disabled={evaluations.length === 0 || isSubmitting}
-            className={`px-12 py-5 rounded-full font-bold text-[10px] uppercase tracking-[0.4em] transition-all duration-700 ${
+            className={`w-full py-4 rounded-full font-bold text-[9px] uppercase tracking-[0.4em] transition-all duration-700 ${
               evaluations.length > 0 
-                ? 'bg-[#d97757] text-[#f5f0e8] shadow-2xl shadow-[#d97757]/40 scale-100 hover:scale-105 active:scale-95' 
+                ? 'bg-[#d97757] text-[#f5f0e8] shadow-xl shadow-[#d97757]/30 scale-100 hover:scale-105 active:scale-95' 
                 : 'bg-[#1c1814] text-[#7a6e64] opacity-40 cursor-not-allowed border border-[#3d3128]'
             }`}
           >
-            {isSubmitting ? 'Sincronizando...' : 'Ecoar Voz'}
+            {isSubmitting ? 'Sincronizando...' : 'Confirmar Voto'}
           </button>
           
           <motion.p 
             key={evaluations.length}
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 0.6, y: 0 }}
-            className="text-[8px] text-[#7a6e64] uppercase tracking-widest"
+            className="text-[7px] text-[#7a6e64] uppercase tracking-widest text-center"
           >
-            {evaluations.length === 0 ? 'Toque nos fragmentos para avaliar' : `${evaluations.length} atributos vinculados à sua voz`}
+            {evaluations.length === 0 ? 'Toque nos fragmentos ao redor' : `${evaluations.length} atributos vinculados`}
           </motion.p>
         </div>
       </div>

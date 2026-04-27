@@ -31,6 +31,11 @@
   
   --font-sans: 'Poppins', sans-serif;
   --font-serif: 'Lora', serif;
+  /* Safe Areas for Mobile */
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+  --safe-left: env(safe-area-inset-left);
+  --safe-right: env(safe-area-inset-right);
 }
 
 @theme inline {
@@ -54,10 +59,24 @@
   --color-voter: var(--voter);
 }
 
+@layer utilities {
+  .pb-safe {
+    padding-bottom: var(--safe-bottom, 0);
+  }
+  .pt-safe {
+    padding-top: var(--safe-top, 0);
+  }
+  .px-safe {
+    padding-left: var(--safe-left, 0);
+    padding-right: var(--safe-right, 0);
+  }
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -65,8 +84,10 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   min-height: 100vh;
+  min-height: 100svh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  width: 100%;
 }
 
 h1, h2, h3, h4, .font-title {

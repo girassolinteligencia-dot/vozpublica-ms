@@ -14,7 +14,7 @@ async function vincularAtributos() {
   // 2. Pegar todas as campanhas de 2018 a 2024
   const campanhas = await prisma.campanha.findMany({
     where: {
-      slug: { in: ['ms-2018', 'ms-2020', 'ms-2022', 'ms-2024'] }
+      slug: { in: ['ms-2018', 'ms-2020', 'ms-2022', 'ms-2024', 'ms-2026'] }
     }
   });
 

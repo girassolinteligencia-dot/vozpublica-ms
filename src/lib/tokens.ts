@@ -33,8 +33,8 @@ export const TOKENS = {
     TEXT_MUTED: '#b0aea5',
   },
   FONTS: {
-    DISPLAY: "'Poppins', sans-serif",
-    BODY: "'Lora', serif",
+    DISPLAY: "'Outfit', sans-serif",
+    BODY: "'Roboto', sans-serif",
   },
   SIZES: {
     FRAGMENT_MOBILE: 68, // Updated for 412px reference

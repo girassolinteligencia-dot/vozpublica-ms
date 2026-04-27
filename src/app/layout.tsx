@@ -1,18 +1,16 @@
 import type { Metadata } from "next";
-import { Poppins, Lora } from "next/font/google";
+import { Outfit, Roboto } from "next/font/google";
 import "./globals.css";
 
-const poppins = Poppins({ 
+const outfit = Outfit({ 
   subsets: ["latin"], 
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-poppins" 
+  variable: "--font-outfit" 
 });
 
-const lora = Lora({ 
+const roboto = Roboto({ 
   subsets: ["latin"], 
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-lora" 
+  weight: ["400", "500", "700"],
+  variable: "--font-roboto" 
 });
 
 export const metadata: Metadata = {
@@ -26,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${poppins.variable} ${lora.variable}`}>
-      <body className="antialiased bg-[#141413] text-[#f5f0e8]">{children}</body>
+    <html lang="pt-BR" className={`${outfit.variable} ${roboto.variable}`}>
+      <body className="antialiased bg-[#141413] text-[#f5f0e8] overflow-x-hidden">{children}</body>
     </html>
   );
 }

@@ -61,6 +61,7 @@ model Candidato {
   foto_url           String?
   cidade             String
   bairro             String?
+  status             String   @default("Ativo") // Ativo, Inativo
   status_verificacao Boolean  @default(false)
   total_avaliacoes   Int      @default(0)
   campanha_id        String
