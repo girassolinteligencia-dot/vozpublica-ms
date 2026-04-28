@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
           }
         }),
       },
+      take: 50,
       include: {
         campanha: {
           include: {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 
 interface ParallaxState {
   x: number;
@@ -12,39 +12,39 @@ interface ParallaxState {
  */
 export const useGiroscopio = (lerpFactor: number = 0.06) => {
   const [offset, setOffset] = useState<ParallaxState>({ x: 0, y: 0 });
-  const [target, setTarget] = useState<ParallaxState>({ x: 0, y: 0 });
+  const targetRef = useRef<ParallaxState>({ x: 0, y: 0 });
+  const offsetRef = useRef<ParallaxState>({ x: 0, y: 0 });
 
   const handleDeviceOrientation = useCallback((e: DeviceOrientationEvent) => {
-    const { beta, gamma } = e; // beta: front-to-back, gamma: left-to-right
+    const { beta, gamma } = e;
     if (beta !== null && gamma !== null) {
-      // Normalize values (typical range -30 to 30)
       const x = Math.max(-1, Math.min(1, gamma / 30));
-      const y = Math.max(-1, Math.min(1, (beta - 45) / 30)); // 45deg as neutral tilt
-      setTarget({ x, y });
+      const y = Math.max(-1, Math.min(1, (beta - 45) / 30));
+      targetRef.current = { x, y };
     }
   }, []);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    const x = (e.clientX / window.innerWidth) * 2 - 1;
-    const y = (e.clientY / window.innerHeight) * 2 - 1;
-    setTarget({ x, y });
+    const x = (e.clientX / (typeof window !== 'undefined' ? window.innerWidth : 1)) * 2 - 1;
+    const y = (e.clientY / (typeof window !== 'undefined' ? window.innerHeight : 1)) * 2 - 1;
+    targetRef.current = { x, y };
   }, []);
 
   useEffect(() => {
-    // Fallback to mouse move if device orientation is not available
+    if (typeof window === 'undefined') return;
+
     if (window.DeviceOrientationEvent) {
       window.addEventListener('deviceorientation', handleDeviceOrientation);
-    } else {
-      window.addEventListener('mousemove', handleMouseMove);
     }
+    window.addEventListener('mousemove', handleMouseMove);
 
-    // Animation loop for Lerp
     let animationFrameId: number;
     const animate = () => {
-      setOffset(prev => ({
-        x: prev.x + (target.x - prev.x) * lerpFactor,
-        y: prev.y + (target.y - prev.y) * lerpFactor,
-      }));
+      offsetRef.current = {
+        x: offsetRef.current.x + (targetRef.current.x - offsetRef.current.x) * lerpFactor,
+        y: offsetRef.current.y + (targetRef.current.y - offsetRef.current.y) * lerpFactor,
+      };
+      setOffset({ ...offsetRef.current });
       animationFrameId = requestAnimationFrame(animate);
     };
 
@@ -55,7 +55,7 @@ export const useGiroscopio = (lerpFactor: number = 0.06) => {
       window.removeEventListener('mousemove', handleMouseMove);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [handleDeviceOrientation, handleMouseMove, target, lerpFactor]);
+  }, [handleDeviceOrientation, handleMouseMove, lerpFactor]);
 
   return offset;
 };
