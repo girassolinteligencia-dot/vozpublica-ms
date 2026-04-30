@@ -25,7 +25,7 @@ export default function AdminLoginPage() {
     }
 
     const getURL = () => {
-      let url = window.location.origin;
+      const url = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
       return url.endsWith('/') ? url : `${url}/`;
     };
 
