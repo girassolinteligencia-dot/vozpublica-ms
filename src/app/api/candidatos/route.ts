@@ -6,15 +6,13 @@ export async function GET(req: NextRequest) {
   const search = searchParams.get('search') || '';
 
   try {
-    // Buscar ano ativo nos parâmetros da plataforma
-    const paramAno = await prisma.parametroPlataforma.findUnique({
-      where: { chave: 'geral_ano_pleito' }
-    });
-    const anoAtivo = paramAno ? (paramAno.valor as number) : 2024;
+    // Query de candidatos restrita aos anos de 2022 e 2024
 
     const candidatos = await prisma.candidato.findMany({
       where: {
-        ano_eleicao: anoAtivo,
+        ano_eleicao: {
+          in: [2022, 2024]
+        },
         ...(search && {
           nome: {
             contains: search,

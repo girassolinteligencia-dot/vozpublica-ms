@@ -5,6 +5,11 @@ import { prisma } from '@/lib/prisma';
 export async function GET(req: NextRequest) {
   try {
     const candidatos = await prisma.candidato.findMany({
+      where: {
+        ano_eleicao: {
+          in: [2022, 2024]
+        }
+      },
       include: {
         campanha: true
       },
