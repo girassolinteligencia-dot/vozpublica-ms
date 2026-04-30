@@ -84,6 +84,7 @@ export default function DashboardLayout({
     { id: 'home', label: 'Início', icon: '📊', path: '/admin/dashboard' },
     { id: 'campanhas', label: 'Campanhas', icon: '📢', path: '/admin/dashboard/campanhas' },
     { id: 'candidatos', label: 'Candidatos', icon: '👥', path: '/admin/dashboard/candidatos' },
+    { id: 'parametros', label: 'Parâmetros', icon: '⚙️', path: '/admin/dashboard/parametros' },
     { id: 'bloqueios', label: 'Segurança', icon: '🛡️', path: '/admin/dashboard/bloqueios' },
   ];
 
