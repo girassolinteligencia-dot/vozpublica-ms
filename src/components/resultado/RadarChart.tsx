@@ -36,7 +36,7 @@ export const RadarChart: React.FC<RadarChartProps> = ({ data }) => {
   return (
     <div className="w-full h-full flex items-center justify-center">
       <ResponsiveContainer width="100%" height="100%">
-        <RechartsRadar cx="50%" cy="50%" outerRadius="75%" data={data}>
+        <RechartsRadar cx="50%" cy="50%" outerRadius="62%" data={data}>
           <PolarGrid 
             stroke={TOKENS.COLORS.BORDER} 
             opacity={0.3} 
@@ -44,7 +44,27 @@ export const RadarChart: React.FC<RadarChartProps> = ({ data }) => {
           />
           <PolarAngleAxis 
             dataKey="atributo" 
-            tick={{ fill: TOKENS.COLORS.TEXT_MUTED, fontSize: 8, fontWeight: 700, letterSpacing: '0.1em' }}
+            tick={(props: any) => {
+              const { x, y, payload, textAnchor } = props;
+              const valY = typeof y === 'number' ? y : parseFloat(y);
+              // Ajuste fino para evitar cortes nos nomes
+              const dy = valY > 150 ? 15 : (valY < 50 ? -10 : 5);
+              return (
+                <g transform={`translate(${x},${y})`}>
+                  <text
+                    x={0}
+                    y={dy}
+                    textAnchor={textAnchor as 'start' | 'middle' | 'end'}
+                    fill={TOKENS.COLORS.TEXT_MUTED}
+                    fontSize={9}
+                    fontWeight={700}
+                    style={{ letterSpacing: '0.05em' }}
+                  >
+                    {payload.value.toUpperCase()}
+                  </text>
+                </g>
+              );
+            }}
           />
           <PolarRadiusAxis 
             angle={30} 

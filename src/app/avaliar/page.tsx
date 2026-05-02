@@ -10,6 +10,8 @@ import { Etapa2 } from '@/components/etapas/Etapa2';
 import { Etapa3 } from '@/components/etapas/Etapa3';
 import { Etapa4 } from '@/components/etapas/Etapa4';
 import { Etapa5 } from '@/components/etapas/Etapa5';
+import { EtapaAprovacao } from '@/components/etapas/EtapaAprovacao';
+import { EtapaExpectativa } from '@/components/etapas/EtapaExpectativa';
 import { Etapa6 } from '@/components/etapas/Etapa6';
 import { Fragmento } from '@/components/fragmento/Fragmento';
 
@@ -77,7 +79,10 @@ export default function AvaliarPage() {
   const [candidato, setCandidato] = useState<Candidato | null>(null);
 
   const [evaluations, setEvaluations] = useState<{ atributoId: string; valor: number }[]>([]);
+  const [aprovacao, setAprovacao] = useState<boolean | null>(null);
+  const [expectativaVitoria, setExpectativaVitoria] = useState<boolean | null>(null);
   const [results, setResults] = useState<ResultData[]>([]);
+  const [advancedResults, setAdvancedResults] = useState<any>(null);
   const [honeypotValue, setHoneypotValue] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const startTimeRef = useRef<number>(0);
@@ -120,9 +125,12 @@ export default function AvaliarPage() {
   };
 
 
-  const submitEvaluation = async () => {
+  const submitEvaluation = async (finalAprovacao?: boolean, finalExpectativa?: boolean) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
+
+    const curAprovacao = finalAprovacao !== undefined ? finalAprovacao : aprovacao;
+    const curExpectativa = finalExpectativa !== undefined ? finalExpectativa : expectativaVitoria;
 
     try {
       await new Promise(resolve => setTimeout(resolve, 1200));
@@ -137,7 +145,9 @@ export default function AvaliarPage() {
           startTime: startTimeRef.current,
           endTime: Date.now(),
           honeypot: !!honeypotValue,
-          perfil: userData
+          perfil: userData,
+          aprovacao: curAprovacao,
+          expectativaVitoria: curExpectativa
         })
       });
 
@@ -147,11 +157,15 @@ export default function AvaliarPage() {
           const resResults = await fetch(`/api/resultados/${candidato?.id}`);
           const dataResults = await resResults.json();
           setResults(Array.isArray(dataResults) ? dataResults : []);
+
+          const resAdvanced = await fetch(`/api/resultados/${candidato?.id}/percepcao`);
+          const dataAdvanced = await resAdvanced.json();
+          setAdvancedResults(dataAdvanced);
         } catch {
           console.warn('Não foi possível carregar resultados');
           setResults([]);
         }
-        setStep(6);
+        setStep(8);
       } else {
         const errorData = await res.json().catch(() => ({}));
         console.error('Erro ao enviar avaliação:', errorData);
@@ -260,18 +274,35 @@ export default function AvaliarPage() {
               )}
               {step === 5 && candidato && (
                 <Etapa5 
+                  key={candidato.id}
                   candidato={candidato}
                   evaluations={evaluations}
                   onAttributeClick={handleAttributeClick}
-                  onSubmit={submitEvaluation}
+                  onNext={() => setStep(6)}
                   isSubmitting={isSubmitting}
                   parallax={parallax}
                   config={config}
                 />
               )}
               {step === 6 && (
+                <EtapaAprovacao 
+                  onSelect={(val) => { setAprovacao(val); setStep(7); }}
+                  onBack={() => setStep(5)}
+                />
+              )}
+              {step === 7 && (
+                <EtapaExpectativa 
+                  onSelect={(val) => { 
+                    setExpectativaVitoria(val); 
+                    submitEvaluation(aprovacao!, val);
+                  }}
+                  onBack={() => setStep(6)}
+                />
+              )}
+              {step === 8 && (
                 <Etapa6 
                   results={results}
+                  advancedResults={advancedResults}
                   candidatoNome={candidato?.nome || ''}
                   onReset={() => window.location.reload()}
                 />

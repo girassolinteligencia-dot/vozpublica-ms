@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { RadarChart } from '@/components/resultado/RadarChart';
+import { PercepcaoDashboard } from '@/components/resultado/PercepcaoDashboard';
 import Image from 'next/image';
 import { Fragmento } from '../fragmento/Fragmento';
 
@@ -14,11 +15,12 @@ interface ResultData {
 
 interface Etapa6Props {
   results: ResultData[];
+  advancedResults: any;
   candidatoNome: string;
   onReset: () => void;
 }
 
-export const Etapa6: React.FC<Etapa6Props> = ({ results, candidatoNome, onReset }) => {
+export const Etapa6: React.FC<Etapa6Props> = ({ results, advancedResults, candidatoNome, onReset }) => {
   const totalVozes = results.reduce((acc, curr) => acc + curr.total, 0);
 
   return (
@@ -41,18 +43,18 @@ export const Etapa6: React.FC<Etapa6Props> = ({ results, candidatoNome, onReset 
         </p>
       </div>
 
-      <div className="relative w-full max-w-[300px] aspect-square flex items-center justify-center shrink-0">
-        <div className="absolute inset-0 z-0 flex items-center justify-center opacity-30 blur-2xl pointer-events-none scale-125">
+      <div className="relative w-full max-w-[360px] aspect-square flex items-center justify-center shrink-0">
+        <div className="absolute inset-0 z-0 flex items-center justify-center opacity-20 blur-3xl pointer-events-none scale-150">
           <Fragmento id="result-core" label="" type="positivo" />
         </div>
         
-        <div className="relative z-10 w-full h-full bg-[#1c1814]/40 backdrop-blur-xl rounded-[2.5rem] border border-[#3d3128] p-6 shadow-xl flex items-center justify-center overflow-hidden">
+        <div className="relative z-10 w-full h-full bg-[#1c1814]/40 backdrop-blur-xl rounded-[3rem] border border-[#3d3128] p-2 shadow-2xl flex items-center justify-center">
           <RadarChart data={results} />
         </div>
       </div>
 
       <motion.div 
-        className="mt-8 w-full max-w-[280px] flex flex-col gap-4 shrink-0"
+        className="mt-8 w-full max-w-[340px] flex flex-col gap-4 shrink-0"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.8 }}
@@ -77,6 +79,11 @@ export const Etapa6: React.FC<Etapa6Props> = ({ results, candidatoNome, onReset 
           />
         </div>
       </motion.div>
+
+      {/* Advanced Indicators Dashboard */}
+      <div className="w-full mt-12 mb-8 max-w-[340px]">
+        <PercepcaoDashboard data={advancedResults} />
+      </div>
 
       <div className="mt-auto pt-8 pb-12 w-full flex flex-col items-center gap-6">
         <motion.button 

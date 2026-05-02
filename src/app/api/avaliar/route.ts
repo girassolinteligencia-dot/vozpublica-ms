@@ -11,7 +11,10 @@ export async function POST(req: NextRequest) {
       fingerprint,
       startTime,
       endTime,
-      honeypot 
+      honeypot,
+      perfil,
+      aprovacao,
+      expectativaVitoria
     } = body;
 
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
@@ -42,11 +45,28 @@ export async function POST(req: NextRequest) {
 
     // 2. Processamento da Avaliação
     await prisma.$transaction(async (tx) => {
-      // Criar as avaliações
+      // Criar a Manifestação (Sessão de Voto)
+      const manifestacao = await tx.manifestacao.create({
+        data: {
+          candidato_id: candidatoId,
+          aprovacao,
+          expectativa_vitoria: expectativaVitoria,
+          perfil: perfil || {},
+          fingerprint_hash: fingerprintHash,
+          ip_hash: ipHash,
+          user_agent: userAgent,
+          duration_ms: duration,
+          is_valid: isValid,
+          honeypot_triggered: isBot
+        }
+      });
+
+      // Criar as avaliações linkadas
       const created = await Promise.all(
         avaliacoes.map((av: { atributoId: string, valor: number }) => 
           tx.avaliacao.create({
             data: {
+              manifestacao_id: manifestacao.id,
               candidato_id: candidatoId,
               atributo_id: av.atributoId,
               valor: av.valor,
@@ -69,7 +89,7 @@ export async function POST(req: NextRequest) {
       if (isValid) {
         await tx.candidato.update({
           where: { id: candidatoId },
-          data: { total_avaliacoes: { increment: avaliacoes.length } }
+          data: { total_avaliacoes: { increment: 1 } } // Incrementamos sessões, não atributos individualmente
         });
 
         const cand = await tx.candidato.findUnique({
@@ -88,8 +108,8 @@ export async function POST(req: NextRequest) {
         await tx.auditLog.create({
           data: {
             acao: isBot ? 'BOT_DETECTED' : 'SUSPICIOUS_TIMING',
-            entidade: 'Avaliacao',
-            entidade_id: candidatoId,
+            entidade: 'Manifestacao',
+            entidade_id: manifestacao.id,
             detalhes: {
               ip_hash: ipHash,
               duration_ms: duration,

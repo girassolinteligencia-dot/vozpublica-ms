@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
@@ -25,40 +25,34 @@ interface Etapa5Props {
   candidato: Candidato;
   evaluations: { atributoId: string; valor: number }[];
   onAttributeClick: (id: string, valor: number) => void;
-  onSubmit: () => void;
+  onNext: () => void;
   isSubmitting: boolean;
   parallax: { x: number; y: number };
-  config?: any;
+  config?: {
+    fluxo_limite_positivos?: number;
+    fluxo_limite_negativos?: number;
+    fluxo_minimo_selecao?: number;
+    [key: string]: any;
+  };
 }
 
 export const Etapa5: React.FC<Etapa5Props> = ({ 
   candidato, 
   evaluations, 
   onAttributeClick, 
-  onSubmit, 
+  onNext, 
   isSubmitting,
   parallax,
   config
 }) => {
   // Configurações do Painel Administrativo
-  const limitePositivos = config?.fluxo_limite_positivos ?? 5;
-  const limiteNegativos = config?.fluxo_limite_negativos ?? 5;
   const minimoSelecao = config?.fluxo_minimo_selecao ?? 5;
 
-  // Seleção aleatória de atributos (Memoized para não mudar ao clicar)
-  const visibleAttributes = useMemo(() => {
+  const [visibleAttributes] = React.useState<Atributo[]>(() => {
     const all = candidato.campanha?.atributos?.map(a => a.atributo) || [];
-    
-    const positivos = all.filter(a => a.polaridade > 0).sort(() => Math.random() - 0.5);
-    const negativos = all.filter(a => a.polaridade < 0).sort(() => Math.random() - 0.5);
-
-    const selecionados = [
-      ...positivos.slice(0, limitePositivos),
-      ...negativos.slice(0, limiteNegativos)
-    ];
-
-    return selecionados.sort((a, b) => a.nome.localeCompare(b.nome));
-  }, [candidato.id, limitePositivos, limiteNegativos]);
+    // Mostra todos os atributos selecionados para o candidato, embaralhados aleatoriamente
+    return [...all].sort(() => Math.random() - 0.5);
+  });
 
   const totalVisivel = visibleAttributes.length;
   const canSubmit = evaluations.length >= minimoSelecao;
@@ -84,7 +78,7 @@ export const Etapa5: React.FC<Etapa5Props> = ({
       </AnimatePresence>
 
       {/* Content Container */}
-      <div className="relative z-10 w-full max-w-md flex flex-col items-center gap-4 px-5 pt-6 pb-32">
+      <div className="relative z-10 w-full max-w-md flex flex-col items-center gap-3 px-5 pt-16 pb-28">
         
         {/* Candidate Header — Compact */}
         <motion.div 
@@ -95,24 +89,24 @@ export const Etapa5: React.FC<Etapa5Props> = ({
         >
           {/* Small Photo */}
           <motion.div 
-            className="relative w-[64px] h-[64px] flex-shrink-0 rounded-full border-2 border-[#d97757] overflow-hidden shadow-[0_0_30px_rgba(217,119,87,0.3)] bg-[#1c1814]"
+            className="relative w-[48px] h-[48px] flex-shrink-0 rounded-full border-2 border-[#d97757] overflow-hidden shadow-[0_0_20px_rgba(217,119,87,0.2)] bg-[#1c1814]"
             style={{ x: parallax.x * 2, y: parallax.y * 2 }}
           >
             {candidato.foto_url ? (
-              <Image src={candidato.foto_url} alt={candidato.nome} width={64} height={64} className="w-full h-full object-cover" />
+              <Image src={candidato.foto_url} alt={candidato.nome} width={48} height={48} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-[#d97757]/40 bg-[#1c1814]">
-                <span className="text-[10px] font-bold uppercase tracking-wider">{candidato.nome.split(' ')[0]}</span>
+                <span className="text-[8px] font-bold uppercase tracking-wider">{candidato.nome.split(' ')[0]}</span>
               </div>
             )}
           </motion.div>
 
           {/* Candidate Info */}
           <div className="flex flex-col min-w-0">
-            <h2 className="text-base font-bold font-display uppercase tracking-[0.15em] text-[#f5f0e8] truncate">
+            <h2 className="text-sm font-bold font-display uppercase tracking-[0.1em] text-[#f5f0e8] truncate">
               {candidato.nome}
             </h2>
-            <p className="text-[10px] text-[#b0aea5] font-body uppercase tracking-[0.3em] mt-0.5 font-bold">
+            <p className="text-[9px] text-[#b0aea5] font-body uppercase tracking-[0.2em] mt-0.5 font-bold">
               {candidato.cargo} · {candidato.cidade}
             </p>
           </div>
@@ -137,18 +131,18 @@ export const Etapa5: React.FC<Etapa5Props> = ({
 
         {/* Instruction */}
         <motion.p 
-          className="text-[11px] text-[#b0aea5] text-center font-body leading-relaxed mt-2"
+          className="text-[10px] text-[#b0aea5] text-center font-body leading-tight mt-1"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
         >
-          Selecione pelo menos <span className="text-[#f5f0e8] font-bold">{minimoSelecao}</span> características que você mais associa a este candidato.
+          Selecione <span className="text-[#f5f0e8] font-bold">{minimoSelecao}</span> ou mais características que você associa a este candidato.
         </motion.p>
 
         {/* Unified Attributes — No polarity division */}
         {visibleAttributes.length > 0 && (
-          <div className="w-full flex flex-col gap-2 mt-2">
-            <div className="flex flex-wrap gap-2 justify-center">
+          <div className="w-full flex flex-col gap-1.5 mt-1">
+            <div className="flex flex-wrap gap-1.5 justify-center">
               {visibleAttributes.map((item, i) => {
                 const isSelected = evaluations.some(e => e.atributoId === item.id);
                 return (
@@ -156,20 +150,20 @@ export const Etapa5: React.FC<Etapa5Props> = ({
                     key={item.id}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.03 }}
+                    transition={{ delay: i * 0.01 }}
                     onClick={() => onAttributeClick(item.id, item.polaridade)}
                     className={`
-                      relative px-5 py-3.5 rounded-2xl text-[12px] font-bold uppercase tracking-[0.15em] font-display
-                      transition-all duration-300 cursor-pointer select-none
+                      relative px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-[0.1em] font-display
+                      transition-all duration-200 cursor-pointer select-none
                       ${isSelected 
-                        ? 'bg-[#d97757] text-[#f5f0e8] shadow-[0_0_20px_rgba(217,119,87,0.4)] scale-95' 
-                        : 'bg-[#1c1814] text-[#b0aea5] border border-[#3d3128] hover:border-[#d97757] hover:text-[#d97757] hover:shadow-[0_0_15px_rgba(217,119,87,0.15)] active:scale-95'
+                        ? 'bg-[#d97757] text-[#f5f0e8] shadow-[0_0_15px_rgba(217,119,87,0.3)] scale-95' 
+                        : 'bg-[#1c1814] text-[#b0aea5] border border-[#3d3128] hover:border-[#d97757] hover:text-[#d97757] active:scale-95'
                       }
                     `}
                   >
                     {isSelected && (
                       <motion.span 
-                        className="absolute top-1 right-1.5 text-[10px]"
+                        className="absolute top-0.5 right-1 text-[8px]"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                       >
@@ -192,20 +186,20 @@ export const Etapa5: React.FC<Etapa5Props> = ({
       </div>
 
       {/* Fixed Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 w-full z-50 bg-gradient-to-t from-[#141413] via-[#141413]/95 to-transparent pt-8 pb-8 px-6 flex flex-col items-center gap-3">
+      <div className="fixed bottom-0 left-0 w-full z-50 bg-gradient-to-t from-[#141413] via-[#141413]/95 to-transparent pt-4 pb-6 px-6 flex flex-col items-center gap-2">
         <button 
-          onClick={onSubmit}
+          onClick={onNext}
           disabled={!canSubmit || isSubmitting}
-          className={`w-full max-w-md py-4 rounded-2xl font-bold text-sm uppercase tracking-[0.3em] transition-all duration-500 font-display ${
+          className={`w-full max-w-md py-3 rounded-xl font-bold text-xs uppercase tracking-[0.2em] transition-all duration-500 font-display ${
             canSubmit 
-              ? 'bg-gradient-to-r from-[#d97757] to-[#c8933a] text-[#f5f0e8] shadow-[0_0_40px_rgba(217,119,87,0.35)] hover:shadow-[0_0_60px_rgba(217,119,87,0.5)] active:scale-[0.98]' 
+              ? 'bg-gradient-to-r from-[#d97757] to-[#c8933a] text-[#f5f0e8] shadow-[0_0_30px_rgba(217,119,87,0.3)] hover:shadow-[0_0_50px_rgba(217,119,87,0.4)] active:scale-[0.98]' 
               : 'bg-[#1c1814] text-[#7a6e64] opacity-40 border border-[#3d3128] cursor-not-allowed'
           }`}
         >
           {isSubmitting ? 'Ecoando...' : 'Prosseguir'}
         </button>
 
-        <motion.p className="text-[8px] text-[#7a6e64] uppercase tracking-widest font-bold">
+        <motion.p className="text-[7px] text-[#7a6e64] uppercase tracking-widest font-bold">
           {evaluations.length < minimoSelecao 
             ? `Selecione mais ${minimoSelecao - evaluations.length} para liberar` 
             : `${evaluations.length} selecionados`}
