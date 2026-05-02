@@ -8,24 +8,43 @@ export async function GET(
   const { candidatoId } = await params;
 
   try {
+    // 1. Fetch candidate and their campaign attributes
+    const candidato = await prisma.candidato.findUnique({
+      where: { id: candidatoId },
+      include: {
+        campanha: {
+          include: {
+            atributos: {
+              include: {
+                atributo: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!candidato) {
+      return NextResponse.json({ error: 'Candidato não encontrado' }, { status: 404 });
+    }
+
+    // 2. Fetch evaluation counts per attribute
     const resultados = await prisma.avaliacao.groupBy({
       by: ['atributo_id'],
-      where: { candidato_id: candidatoId },
-      _sum: { valor: true },
+      where: { 
+        candidato_id: candidatoId,
+        is_valid: true 
+      },
       _count: { _all: true }
     });
 
-    // Fetch attribute names
-    const atributos = await prisma.atributo.findMany({
-      where: { id: { in: resultados.map(r => r.atributo_id) } }
-    });
-
-    const data = resultados.map(r => {
-      const attr = atributos.find(a => a.id === r.atributo_id);
+    // 3. Map campaign attributes to results, ensuring all axes exist
+    const data = candidato.campanha.atributos.map(ca => {
+      const res = resultados.find(r => r.atributo_id === ca.atributo_id);
       return {
-        atributo: attr?.nome || 'Desconhecido',
-        valor: r._sum.valor || 0,
-        total: r._count._all
+        atributo: ca.atributo.nome,
+        valor: res?._count._all || 0,
+        total: res?._count._all || 0
       };
     });
 
@@ -35,3 +54,4 @@ export async function GET(
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+

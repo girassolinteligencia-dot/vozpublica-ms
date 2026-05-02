@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
@@ -37,14 +37,32 @@ export const Etapa5: React.FC<Etapa5Props> = ({
   onAttributeClick, 
   onSubmit, 
   isSubmitting,
-  parallax
+  parallax,
+  config
 }) => {
-  // Extract ALL attributes from the candidate's campaign — unified, no division
-  const allAttributes = (candidato.campanha?.atributos?.map(a => a.atributo) || [])
-    .sort((a, b) => a.nome.localeCompare(b.nome));
+  // Configurações do Painel Administrativo
+  const limitePositivos = config?.fluxo_limite_positivos ?? 5;
+  const limiteNegativos = config?.fluxo_limite_negativos ?? 5;
+  const minimoSelecao = config?.fluxo_minimo_selecao ?? 5;
 
-  const totalVisivel = allAttributes.length;
-  const progresso = totalVisivel > 0 ? (evaluations.length / totalVisivel) * 100 : 0;
+  // Seleção aleatória de atributos (Memoized para não mudar ao clicar)
+  const visibleAttributes = useMemo(() => {
+    const all = candidato.campanha?.atributos?.map(a => a.atributo) || [];
+    
+    const positivos = all.filter(a => a.polaridade > 0).sort(() => Math.random() - 0.5);
+    const negativos = all.filter(a => a.polaridade < 0).sort(() => Math.random() - 0.5);
+
+    const selecionados = [
+      ...positivos.slice(0, limitePositivos),
+      ...negativos.slice(0, limiteNegativos)
+    ];
+
+    return selecionados.sort((a, b) => a.nome.localeCompare(b.nome));
+  }, [candidato.id, limitePositivos, limiteNegativos]);
+
+  const totalVisivel = visibleAttributes.length;
+  const canSubmit = evaluations.length >= minimoSelecao;
+  const progresso = (evaluations.length / minimoSelecao) * 100;
 
   return (
     <motion.div 
@@ -104,35 +122,34 @@ export const Etapa5: React.FC<Etapa5Props> = ({
         <div className="w-full h-1 bg-[#1c1814] rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-gradient-to-r from-[#d97757] to-[#c8933a] rounded-full"
-            animate={{ width: `${progresso}%` }}
+            animate={{ width: `${Math.min(progresso, 100)}%` }}
             transition={{ type: 'spring', stiffness: 50, damping: 15 }}
           />
         </div>
-        <p className="text-[9px] text-[#7a6e64] uppercase tracking-[0.4em] font-bold self-end -mt-2">
-          {evaluations.length} / {totalVisivel} selecionados
-        </p>
+        <div className="w-full flex justify-between items-center -mt-2">
+          <p className="text-[9px] text-[#7a6e64] uppercase tracking-[0.4em] font-bold">
+            Associação de Perfil
+          </p>
+          <p className="text-[9px] text-[#d97757] uppercase tracking-[0.4em] font-bold">
+            {evaluations.length} / {minimoSelecao} (Mínimo)
+          </p>
+        </div>
 
         {/* Instruction */}
         <motion.p 
-          className="text-[11px] text-[#b0aea5] text-center font-body leading-relaxed"
+          className="text-[11px] text-[#b0aea5] text-center font-body leading-relaxed mt-2"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
         >
-          Selecione as características que você associa a este candidato
+          Selecione pelo menos <span className="text-[#f5f0e8] font-bold">{minimoSelecao}</span> características que você mais associa a este candidato.
         </motion.p>
 
         {/* Unified Attributes — No polarity division */}
-        {allAttributes.length > 0 && (
-          <div className="w-full flex flex-col gap-2">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#d97757]" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#d97757] font-display">
-                Características
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {allAttributes.map((item, i) => {
+        {visibleAttributes.length > 0 && (
+          <div className="w-full flex flex-col gap-2 mt-2">
+            <div className="flex flex-wrap gap-2 justify-center">
+              {visibleAttributes.map((item, i) => {
                 const isSelected = evaluations.some(e => e.atributoId === item.id);
                 return (
                   <motion.button
@@ -141,12 +158,11 @@ export const Etapa5: React.FC<Etapa5Props> = ({
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.03 }}
                     onClick={() => onAttributeClick(item.id, item.polaridade)}
-                    disabled={isSelected}
                     className={`
                       relative px-5 py-3.5 rounded-2xl text-[12px] font-bold uppercase tracking-[0.15em] font-display
                       transition-all duration-300 cursor-pointer select-none
                       ${isSelected 
-                        ? 'bg-[#d97757] text-[#f5f0e8] shadow-[0_0_20px_rgba(217,119,87,0.4)] scale-95 opacity-80' 
+                        ? 'bg-[#d97757] text-[#f5f0e8] shadow-[0_0_20px_rgba(217,119,87,0.4)] scale-95' 
                         : 'bg-[#1c1814] text-[#b0aea5] border border-[#3d3128] hover:border-[#d97757] hover:text-[#d97757] hover:shadow-[0_0_15px_rgba(217,119,87,0.15)] active:scale-95'
                       }
                     `}
@@ -179,9 +195,9 @@ export const Etapa5: React.FC<Etapa5Props> = ({
       <div className="fixed bottom-0 left-0 w-full z-50 bg-gradient-to-t from-[#141413] via-[#141413]/95 to-transparent pt-8 pb-8 px-6 flex flex-col items-center gap-3">
         <button 
           onClick={onSubmit}
-          disabled={evaluations.length === 0 || isSubmitting}
+          disabled={!canSubmit || isSubmitting}
           className={`w-full max-w-md py-4 rounded-2xl font-bold text-sm uppercase tracking-[0.3em] transition-all duration-500 font-display ${
-            evaluations.length > 0 
+            canSubmit 
               ? 'bg-gradient-to-r from-[#d97757] to-[#c8933a] text-[#f5f0e8] shadow-[0_0_40px_rgba(217,119,87,0.35)] hover:shadow-[0_0_60px_rgba(217,119,87,0.5)] active:scale-[0.98]' 
               : 'bg-[#1c1814] text-[#7a6e64] opacity-40 border border-[#3d3128] cursor-not-allowed'
           }`}
@@ -190,9 +206,12 @@ export const Etapa5: React.FC<Etapa5Props> = ({
         </button>
 
         <motion.p className="text-[8px] text-[#7a6e64] uppercase tracking-widest font-bold">
-          {evaluations.length === 0 ? 'Selecione ao menos uma característica' : `${evaluations.length} de ${totalVisivel} selecionados`}
+          {evaluations.length < minimoSelecao 
+            ? `Selecione mais ${minimoSelecao - evaluations.length} para liberar` 
+            : `${evaluations.length} selecionados`}
         </motion.p>
       </div>
     </motion.div>
   );
 };
+

@@ -110,9 +110,15 @@ export default function AvaliarPage() {
   };
 
   const handleAttributeClick = (atributoId: string, valor: number) => {
-    if (evaluations.find(e => e.atributoId === atributoId)) return;
-    setEvaluations(prev => [...prev, { atributoId, valor }]);
+    setEvaluations(prev => {
+      const exists = prev.find(e => e.atributoId === atributoId);
+      if (exists) {
+        return prev.filter(e => e.atributoId !== atributoId);
+      }
+      return [...prev, { atributoId, valor }];
+    });
   };
+
 
   const submitEvaluation = async () => {
     if (isSubmitting) return;

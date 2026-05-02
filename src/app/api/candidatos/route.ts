@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
 
     const candidatos = await prisma.candidato.findMany({
       where: {
+        status: 'Ativo',
         ano_eleicao: {
           in: [2022, 2024]
         },

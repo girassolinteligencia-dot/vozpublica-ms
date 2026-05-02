@@ -21,33 +21,52 @@ interface RadarChartProps {
 }
 
 export const RadarChart: React.FC<RadarChartProps> = ({ data }) => {
+  // Se não houver dados, mostrar um estado vazio ou placeholder
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full h-full flex items-center justify-center text-[#7a6e64] text-[10px] uppercase tracking-widest font-bold">
+        Aguardando Dados...
+      </div>
+    );
+  }
+
+  // Verificar se todos os valores são zero
+  const allZeros = data.every(d => d.valor === 0);
+
   return (
-    <div className="w-full h-[300px] flex items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center">
       <ResponsiveContainer width="100%" height="100%">
-        <RechartsRadar cx="50%" cy="50%" outerRadius="80%" data={data}>
-          <PolarGrid stroke={TOKENS.COLORS.BORDER} opacity={0.2} />
+        <RechartsRadar cx="50%" cy="50%" outerRadius="75%" data={data}>
+          <PolarGrid 
+            stroke={TOKENS.COLORS.BORDER} 
+            opacity={0.3} 
+            gridType="polygon"
+          />
           <PolarAngleAxis 
             dataKey="atributo" 
-            tick={{ fill: TOKENS.COLORS.TEXT_MUTED, fontSize: 10, fontWeight: 500 }}
+            tick={{ fill: TOKENS.COLORS.TEXT_MUTED, fontSize: 8, fontWeight: 700, letterSpacing: '0.1em' }}
           />
           <PolarRadiusAxis 
             angle={30} 
-            domain={[0, 'auto']} 
+            domain={[0, allZeros ? 5 : 'auto']} 
             tick={false} 
             axisLine={false} 
           />
           <Radar
-            name="Avaliação"
+            name="Percepção"
             dataKey="valor"
             stroke={TOKENS.COLORS.ORANGE}
+            strokeWidth={2}
             fill={TOKENS.COLORS.ORANGE}
-            fillOpacity={0.5}
-            dot={{ r: 3, fill: TOKENS.COLORS.ORANGE, fillOpacity: 1 }}
-            animationDuration={1500}
-            filter="drop-shadow(0 0 8px rgba(217, 119, 87, 0.6))"
+            fillOpacity={0.6}
+            dot={{ r: 3, fill: TOKENS.COLORS.ORANGE, fillOpacity: 1, strokeWidth: 1, stroke: TOKENS.COLORS.CREAM }}
+            animationDuration={2000}
+            animationBegin={300}
+            filter="drop-shadow(0 0 12px rgba(217, 119, 87, 0.8))"
           />
         </RechartsRadar>
       </ResponsiveContainer>
     </div>
   );
 };
+

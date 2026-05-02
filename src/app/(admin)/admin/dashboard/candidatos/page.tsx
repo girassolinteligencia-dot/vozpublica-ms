@@ -10,6 +10,7 @@ interface Candidato {
   cargo: string;
   cidade: string;
   ano_eleicao: number;
+  status: string;
   campanha?: {
     nome: string;
   };
@@ -126,18 +127,24 @@ export default function ManageCandidatos() {
               <th className="px-8 py-6 text-[10px] uppercase font-bold text-text-muted tracking-widest">Cargo</th>
               <th className="px-8 py-6 text-[10px] uppercase font-bold text-text-muted tracking-widest">Ano</th>
               <th className="px-8 py-6 text-[10px] uppercase font-bold text-text-muted tracking-widest">Cidade</th>
+              <th className="px-8 py-6 text-[10px] uppercase font-bold text-text-muted tracking-widest">Status</th>
               <th className="px-8 py-6 text-[10px] uppercase font-bold text-text-muted tracking-widest text-right">Ações</th>
             </tr>
           </thead>
           <tbody>
             {candidatos.map(cand => (
-              <tr key={cand.id} className="border-b border-border/30 hover:bg-white/[0.01] transition-colors group">
+              <tr key={cand.id} className={`border-b border-border/30 hover:bg-white/[0.01] transition-colors group ${cand.status === 'Inativo' ? 'opacity-40' : ''}`}>
                 <td className="px-8 py-5 text-xs font-bold text-text">{cand.nome}</td>
                 <td className="px-8 py-5 text-[10px] font-bold text-[#d97757]">{cand.partido || '-'}</td>
                 <td className="px-8 py-5 text-[10px] font-mono text-text-muted">{cand.numero || '-'}</td>
                 <td className="px-8 py-5 text-[10px] uppercase font-medium text-text-muted">{cand.cargo}</td>
                 <td className="px-8 py-5 text-[10px] font-mono text-text-muted">{cand.ano_eleicao}</td>
                 <td className="px-8 py-5 text-[10px] text-text-muted truncate max-w-[140px]">{cand.cidade}</td>
+                <td className="px-8 py-5">
+                   <span className={`text-[8px] uppercase font-bold tracking-widest px-2 py-1 rounded-full ${cand.status === 'Ativo' ? 'bg-positive/10 text-positive' : 'bg-white/5 text-text-muted'}`}>
+                      {cand.status}
+                   </span>
+                </td>
                 <td className="px-8 py-5 text-right">
                   <button 
                     onClick={() => setEditingCandidato(cand)}

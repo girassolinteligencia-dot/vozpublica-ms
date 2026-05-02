@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Header } from '@/components/ui/Header';
 import { RadarChart } from '@/components/resultado/RadarChart';
 
 interface CandidatoRelatorio {
@@ -31,8 +30,7 @@ export default function RelatoriosAdmin() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#141413] text-[#f5f0e8] pt-24 px-8 pb-12 font-body">
-      <Header />
+    <div className="max-w-7xl mx-auto">
       
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-end mb-12">
@@ -111,6 +109,6 @@ export default function RelatoriosAdmin() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

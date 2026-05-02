@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Header } from '@/components/ui/Header';
 
 interface Atributo {
   id: string;
@@ -92,8 +91,7 @@ export default function AtributosAdmin() {
     : atributos;
 
   return (
-    <main className="min-h-screen bg-[#141413] text-[#f5f0e8] pt-24 px-8 pb-12 font-body">
-      <Header />
+    <div className="max-w-6xl mx-auto">
       
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -337,6 +335,6 @@ export default function AtributosAdmin() {
           </div>
         )}
       </AnimatePresence>
-    </main>
+    </div>
   );
 }

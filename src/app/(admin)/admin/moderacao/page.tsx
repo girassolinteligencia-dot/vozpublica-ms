@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Header } from '@/components/ui/Header';
 
 interface Avaliacao {
   id: string;
@@ -55,8 +54,7 @@ export default function ModeracaoAdmin() {
   };
 
   return (
-    <main className="min-h-screen bg-[#141413] text-[#f5f0e8] pt-24 px-8 pb-12 font-body">
-      <Header />
+    <div className="max-w-7xl mx-auto">
       
       <div className="max-w-7xl mx-auto">
         <div className="mb-12">
@@ -129,6 +127,6 @@ export default function ModeracaoAdmin() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

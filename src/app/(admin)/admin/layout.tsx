@@ -5,15 +5,17 @@ import { supabase } from '@/lib/supabase';
 import { useRouter, usePathname } from 'next/navigation';
 import { Session } from '@supabase/supabase-js';
 
-export default function DashboardLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+
+  const isLoginPage = pathname === '/admin/login';
+  const [loading, setLoading] = useState(!isLoginPage);
 
   const handleLogout = () => {
     localStorage.removeItem('admin_bypass');
@@ -21,6 +23,8 @@ export default function DashboardLayout({
   };
 
   useEffect(() => {
+    if (isLoginPage) return;
+
     // Definimos os e-mails permitidos
     const ALLOWED_EMAILS = [
       'paulo@vozpublica.com.br',
@@ -72,7 +76,9 @@ export default function DashboardLayout({
     return () => {
       subscription.unsubscribe();
     };
-  }, [router]);
+  }, [router, isLoginPage]);
+
+  if (isLoginPage) return <>{children}</>;
 
   if (loading) return (
     <div className="w-full h-[100svh] bg-dark flex items-center justify-center text-primary font-display uppercase tracking-widest animate-pulse">
@@ -151,6 +157,15 @@ export default function DashboardLayout({
       {/* Main Content Scroll Area */}
       <section className="flex-1 overflow-y-auto no-scrollbar bg-gradient-to-br from-dark via-dark to-primary/5">
         <div className="p-6 md:p-12 min-h-full">
+          {/* Botão Voltar para sub-páginas */}
+          {pathname !== '/admin/dashboard' && (
+            <button 
+              onClick={() => router.push('/admin/dashboard')} 
+              className="mb-8 flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-text-muted hover:text-primary transition-colors group"
+            >
+              <span className="text-lg group-hover:-translate-x-1 transition-transform">←</span> Voltar ao Painel
+            </button>
+          )}
           {children}
         </div>
       </section>
