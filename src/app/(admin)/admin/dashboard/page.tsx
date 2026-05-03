@@ -14,68 +14,99 @@ interface RecentEvaluation {
 
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [recentEvaluations, setRecentEvaluations] = useState<RecentEvaluation[]>([]);
   const [stats, setStats] = useState({ totalEvaluations: 0 });
   const router = useRouter();
 
   const fetchRecent = useCallback(async () => {
     try {
+      setError(null);
       const [resRecent, resStats] = await Promise.all([
-        fetch('/api/admin/recent-evaluations'),
-        fetch('/api/admin/stats')
+        fetch('/api/admin/recent-evaluations').catch(() => ({ json: () => [], ok: false })),
+        fetch('/api/admin/stats').catch(() => ({ json: () => ({ totalEvaluations: 0 }), ok: false }))
       ]);
       
-      const [dataRecent, dataStats] = await Promise.all([
-        resRecent.json(),
-        resStats.json()
-      ]);
+      if (!resRecent.ok || !resStats.ok) {
+        console.warn('Algumas APIs do dashboard falharam');
+      }
 
-      setRecentEvaluations(dataRecent);
-      setStats(dataStats);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      const dataRecent = await (resRecent as Response).json().catch(() => []);
+      const dataStats = await (resStats as Response).json().catch(() => ({ totalEvaluations: 0 }));
+
+      setRecentEvaluations(Array.isArray(dataRecent) ? dataRecent : []);
+      setStats(dataStats || { totalEvaluations: 0 });
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError('Falha ao carregar dados do dashboard');
+    } finally {
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
-      // Verifica Bypass de Emergência primeiro
-      const hasBypass = typeof window !== 'undefined' && localStorage.getItem('admin_bypass') === 'true';
-      
-      if (hasBypass) {
-        fetchRecent();
-        setLoading(false);
-        return;
-      }
-
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      
-      if (!currentSession) {
-        router.push('/admin/login');
-      } else {
-        fetchRecent();
+      try {
+        // Verifica Bypass de Emergência primeiro
+        const hasBypass = typeof window !== 'undefined' && localStorage.getItem('admin_bypass') === 'true';
         
-        // Ativa Real-time apenas com sessão real para evitar erros de JWT
-        const channel = supabase
-          .channel('avaliacoes_realtime')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'avaliacoes' }, () => {
-            fetchRecent();
-          })
-          .subscribe();
+        if (hasBypass) {
+          await fetchRecent();
+          setLoading(false);
+          return;
+        }
 
-        return () => {
-          supabase.removeChannel(channel);
-        };
+        const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError || !currentSession) {
+          router.push('/admin/login');
+          return;
+        } else {
+          await fetchRecent();
+          
+          // Ativa Real-time apenas com sessão real para evitar erros de JWT
+          const channel = supabase
+            .channel('avaliacoes_realtime')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'avaliacoes' }, () => {
+              fetchRecent();
+            })
+            .subscribe();
+
+          return () => {
+            supabase.removeChannel(channel);
+          };
+        }
+      } catch (err) {
+        console.error('Auth check failed:', err);
+        setError('Erro na verificação de autenticação');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkAuth();
   }, [router, fetchRecent]);
 
   if (loading) return (
-    <div className="w-full h-[100svh] bg-background flex items-center justify-center text-primary font-display uppercase tracking-widest animate-pulse">
-      Sincronizando Painel...
+    <div className="w-full h-[60vh] flex flex-col items-center justify-center gap-4 text-primary font-display uppercase tracking-widest">
+      <div className="w-12 h-12 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+      <span className="animate-pulse">Sincronizando Painel...</span>
+    </div>
+  );
+
+  if (error) return (
+    <div className="w-full h-[60vh] flex flex-col items-center justify-center gap-6 text-center">
+      <div className="text-4xl">⚠️</div>
+      <div className="flex flex-col gap-2">
+        <h3 className="text-lg font-bold uppercase tracking-widest text-negative">Erro de Conexão</h3>
+        <p className="text-xs text-text-muted opacity-60 uppercase tracking-widest">{error}</p>
+      </div>
+      <button 
+        onClick={() => window.location.reload()}
+        className="px-8 py-4 bg-primary/10 border border-primary/20 rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-primary/20 transition-all"
+      >
+        Tentar Novamente
+      </button>
     </div>
   );
 

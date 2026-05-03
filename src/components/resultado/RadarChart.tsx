@@ -56,9 +56,9 @@ export const RadarChart: React.FC<RadarChartProps> = ({ data }) => {
                     y={dy}
                     textAnchor={textAnchor as 'start' | 'middle' | 'end'}
                     fill={TOKENS.COLORS.TEXT_MUTED}
-                    fontSize={9}
-                    fontWeight={700}
-                    style={{ letterSpacing: '0.05em' }}
+                    fontSize={8}
+                    fontWeight={400}
+                    style={{ letterSpacing: '0.02em' }}
                   >
                     {payload.value.toUpperCase()}
                   </text>
@@ -76,12 +76,11 @@ export const RadarChart: React.FC<RadarChartProps> = ({ data }) => {
             name="Percepção"
             dataKey="valor"
             stroke={TOKENS.COLORS.ORANGE}
-            strokeWidth={2}
+            strokeWidth={3}
             fill={TOKENS.COLORS.ORANGE}
-            fillOpacity={0.6}
-            dot={{ r: 3, fill: TOKENS.COLORS.ORANGE, fillOpacity: 1, strokeWidth: 1, stroke: TOKENS.COLORS.CREAM }}
-            animationDuration={2000}
-            animationBegin={300}
+            fillOpacity={0.4}
+            isAnimationActive={false}
+            dot={{ r: 4, fill: TOKENS.COLORS.ORANGE, fillOpacity: 1, strokeWidth: 1, stroke: TOKENS.COLORS.CREAM }}
             filter="drop-shadow(0 0 12px rgba(217, 119, 87, 0.8))"
           />
         </RechartsRadar>
